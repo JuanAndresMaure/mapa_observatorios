@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <html style="height: auto;">
-<!--Mapa en etapa de validación-->
-<!--Elaborado por Juan Andrés Maure, Director de Sistemas de Información Geográfica del COPADE, Neuquén.-->
+<!-- Mapa en etapa de validación -->
+<!-- Elaborado por Juan Andrés Maure, Director de Sistemas de Información Geográfica del COPADE, Neuquén. -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,7 +26,7 @@
             <div><span style="color: green;">●</span> Municipal</div>
         </div>
     </div>
-    
+
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
     <script>
@@ -36,7 +36,7 @@
         }).addTo(map);
 
         // Agregar observatorios desde un archivo GeoJSON
-        fetch('observatorios.geojson')
+        fetch('https://raw.githubusercontent.com/JuanAndresMaure/mapa_observatorios/main/observatorios.geojson')
             .then(response => response.json())
             .then(data => {
                 const markers = L.markerClusterGroup();
