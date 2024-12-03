@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<html style="height: auto;">
+<!--Mapa en etapa de validación-->
+<!--Elaborado por Juan Andrés Maure, Director de Sistemas de Información Geográfica del COPADE, Neuquén.-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa de Observatorios</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="map" role="application" aria-label="Mapa de observatorios"></div>
+    <button id="toggle-legend" aria-expanded="false" aria-controls="legend">Mostrar Leyenda</button>
+    <div id="legend" role="region" aria-labelledby="toggle-legend" style="display: none;">
+        <h4>Leyenda:</h4>
+        <button id="toggle-observatories" aria-expanded="false" aria-controls="observatories">Observatorios</button>
+        <div id="observatories" style="display: none;">
+            <h5>Categorías:</h5>
+            <div><span style="color: red;">●</span> Regional</div>
+            <div><span style="color: orange;">●</span> Provincial</div>
+            <div><span style="color: green;">●</span> Municipal</div>
+        </div>
+    </div>
+    
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+    <script>
+        const map = L.map('map').setView([-38.95, -68.06], 6); // Centrado en Neuquén
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Agregar observatorios desde un archivo GeoJSON
+        fetch('observatorios.geojson')
+            .then(response => response.json())
+            .then(data => {
+                const markers = L.markerClusterGroup();
+
+                L.geoJSON(data, {
+                    onEachFeature: (feature, layer) => {
+                        const popupContent = `
+                            <div style="font-family: Arial, sans-serif; font-size: 13px; line-height: 1.5;">
+                                <div style="background-color: #007BFF; color: white; padding: 8px; border-radius: 5px; text-align: center; font-weight: bold;">
+                                    ${feature.properties["Nombre del Observatorio"]}
+                                </div>
+                                <div style="padding: 8px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 5px 5px;">
+                                    <p style="margin: 0;"><b>Temática:</b> ${feature.properties.tematica}</p>
+                                    <p style="margin: 0;"><b>Norma Legal:</b> ${feature.properties.norma_legal}</p>
+                                    <p style="margin: 0;"><b>Dependencia:</b> ${feature.properties.dependencia_ins}</p>
+                                </div>
+                            </div>
+                        `;
+                        layer.bindPopup(popupContent);
+                    },
+                    pointToLayer: (feature, latlng) => {
+                        let color = 'gray';
+                        if (feature.properties.alcance_territorial === 'Regional') color = 'red';
+                        if (feature.properties.alcance_territorial === 'Provincial') color = 'orange';
+                        if (feature.properties.alcance_territorial === 'Municipal') color = 'green';
+                        return L.circleMarker(latlng, {
+                            radius: 8,
+                            fillColor: color,
+                            color: '#000',
+                            weight: 1,
+                            opacity: 1,
+                            fillOpacity: 0.8
+                        });
+                    }
+                }).addTo(markers);
+
+                map.addLayer(markers);
+            });
+
+        // Leyenda interactiva
+        const toggleButton = document.getElementById('toggle-legend');
+        const legend = document.getElementById('legend');
+
+        toggleButton.addEventListener('click', () => {
+            const isExpanded = legend.style.display === 'block';
+            legend.style.display = isExpanded ? 'none' : 'block';
+            toggleButton.textContent = isExpanded ? 'Mostrar Leyenda' : 'Ocultar Leyenda';
+            toggleButton.setAttribute('aria-expanded', !isExpanded);
+        });
+
+        const toggleSection = (buttonId, sectionId) => {
+            const button = document.getElementById(buttonId);
+            const section = document.getElementById(sectionId);
+
+            button.addEventListener('click', () => {
+                const isExpanded = section.style.display === 'block';
+                section.style.display = isExpanded ? 'none' : 'block';
+                button.textContent = isExpanded ? buttonId.replace('toggle-', '') : `Ocultar ${buttonId.replace('toggle-', '')}`;
+                button.setAttribute('aria-expanded', !isExpanded);
+            });
+        };
+
+        toggleSection('toggle-observatories', 'observatories');
+    </script>
+</body>
+</html>
