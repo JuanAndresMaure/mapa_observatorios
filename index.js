@@ -7,7 +7,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 // Cargar observatorios desde un archivo GeoJSON
-fetch('observatorios.geojson')
+fetch('https://raw.githubusercontent.com/JuanAndresMaure/mapa_observatorios/main/observatorios.geojson')
     .then(response => response.json())
     .then(data => {
         const markers = L.markerClusterGroup();
